@@ -119,4 +119,9 @@
 	IP.3 = ${MASTER_IP}
 	IP.4 = ${MASTER_LOADBALANCER_IP}
 	IP.5 = 192.168.0.1
-替换相应的变量提交地址提交为实际地址
+替换相应的变量地址为实际地址  
+
+	openssl genrsa -out apiserver-key.pem 2048
+	openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=kube-apiserver" -config openssl.cnf
+	openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
+
