@@ -124,4 +124,27 @@
 	openssl genrsa -out apiserver-key.pem 2048
 	openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=kube-apiserver" -config openssl.cnf
 	openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
+#### 准备各个节点kubelet证书 
+生成worker-openssl.cnf  
 
+	[req]
+	req_extensions = v3_req
+	distinguished_name = req_distinguished_name
+	[req_distinguished_name]
+	[ v3_req ]
+	basicConstraints = CA:FALSE
+	keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+	subjectAltName = @alt_names
+	[alt_names]
+	IP.1 = $ENV::WORKER_IP
+	
+	export WORKER_IP=10.1.245.8
+	export WORKER_FQDN=kube-work-1
+	openssl genrsa -out ${WORKER_FQDN}-worker-key.pem 2048
+	WORKER_IP=${WORKER_IP} openssl req -new -key ${WORKER_FQDN}-worker-key.pem -out ${WORKER_FQDN}-worker.csr -subj "/CN=${WORKER_FQDN}" -config worker-openssl.cnf
+	WORKER_IP=${WORKER_IP} openssl x509 -req -in ${WORKER_FQDN}-worker.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out ${WORKER_FQDN}-worker.pem -days 365 -extensions v3_req -extfile worker-openssl.cnf
+#### 生成管理秘钥对
+	openssl genrsa -out admin-key.pem 2048
+	openssl req -new -key admin-key.pem -out admin.csr -subj "/CN=kube-admin"
+	openssl x509 -req -in admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out admin.pem -days 365
+	
