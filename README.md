@@ -556,3 +556,257 @@ CAlICO作为容器间网络实现
 #### 如果以上信息显示不一致，则说明搭建不成功。如果pool没有显示 ipip等，需要删除pool，自己手动添加。
 #### 可以使用ip route 命令查看并删除不需要的路由，使用iptables -L,iptable -F, iptables -X, iptable -Z查看或者清空防火墙规则
 #### 按照上面的创建容器方法重新创建两个容器，在容器内互相ping 对方，如果可以ping通，则网络完成。如果不通，需要查看各个部分的日志
+## 7. 安装kube-dns
+### 1)  skydns-rc.yaml
+	apiVersion: extensions/v1beta1
+	kind: Deployment
+	metadata:
+	  name: kube-dns
+	  namespace: kube-system
+	  labels:
+	    k8s-app: kube-dns
+	    kubernetes.io/cluster-service: "true"
+	spec:
+	  # replicas: not specified here:
+	  # 1. In order to make Addon Manager do not reconcile this replicas parameter.
+	  # 2. Default is 1.
+	  # 3. Will be tuned in real time if DNS horizontal auto-scaling is turned on.
+	  strategy:
+	    rollingUpdate:
+	      maxSurge: 10%
+	      maxUnavailable: 0
+	  selector:
+	    matchLabels:
+	      k8s-app: kube-dns
+	  template:
+	    metadata:
+	      labels:
+		k8s-app: kube-dns
+	      annotations:
+		scheduler.alpha.kubernetes.io/critical-pod: ''
+		scheduler.alpha.kubernetes.io/tolerations: '[{"key":"CriticalAddonsOnly", "operator":"Exists"}]'
+	    spec:
+	      containers:
+	      - name: kubedns
+		image: gcr.io/google_containers/kubedns-amd64:1.9
+		resources:
+		  # TODO: Set memory limits when we've profiled the container for large
+		  # clusters, then set request = limit to keep this container in
+		  # guaranteed class. Currently, this container falls into the
+          # "burstable" category so the kubelet doesn't backoff from restarting it.
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        livenessProbe:
+          httpGet:
+            path: /healthz-kubedns
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8080
+            scheme: HTTP
+          # we poll on pod startup for the Kubernetes master service and
+          # only setup the /readiness HTTP server once that's available.
+          initialDelaySeconds: 3
+          timeoutSeconds: 5
+        args:
+        # command = "/kube-dns"
+        - --domain=cluster.local.
+        - --dns-port=10053
+        - --kube-master-url=http://10.1.245.224:9090
+        - --config-map=kube-dns
+        - --v=0
+        env:
+          - name: PROMETHEUS_PORT
+            value: "10055"
+        ports:
+        - containerPort: 10053
+          name: dns-local
+          protocol: UDP
+        - containerPort: 10053
+          name: dns-tcp-local
+          protocol: TCP
+        - containerPort: 10055
+          name: metrics
+          protocol: TCP
+      - name: dnsmasq
+        image: gcr.io/google_containers/kube-dnsmasq-amd64:1.4
+        livenessProbe:
+          httpGet:
+            path: /healthz-dnsmasq
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        args:
+        - --cache-size=1000
+        - --no-resolv
+        - --server=127.0.0.1#10053
+        - --log-facility=-
+        ports:
+        - containerPort: 53
+          name: dns
+          protocol: UDP
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+      - name: dnsmasq-metrics
+        image: gcr.io/google_containers/dnsmasq-metrics-amd64:1.0
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: 10054
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        args:
+        - --v=2
+        - --logtostderr
+        ports:
+        - containerPort: 10054
+          name: metrics
+          protocol: TCP
+        resources:
+          requests:
+            memory: 10Mi
+      - name: healthz
+        image: gcr.io/google_containers/exechealthz-amd64:1.2
+        resources:
+          limits:
+            memory: 50Mi
+          requests:
+            cpu: 10m
+            # Note that this container shouldn't really need 50Mi of memory. The
+            # limits are set higher than expected pending investigation on #29688.
+            # The extra memory was stolen from the kubedns container to keep the
+            # net memory requested by the pod constant.
+            memory: 50Mi
+        args:
+        - --cmd=nslookup kubernetes.default.svc.cluster.local 127.0.0.1 >/dev/null
+        - --url=/healthz-dnsmasq
+        - --cmd=nslookup kubernetes.default.svc.cluster.local 127.0.0.1:10053 >/dev/null
+        - --url=/healthz-kubedns
+        - --port=8080
+        - --quiet
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+      dnsPolicy: Default  # Don't use cluster DNS.
+### 2) skydns-svc.yaml
+	apiVersion: v1
+	kind: Service
+	metadata:
+	  name: kube-dns
+	  namespace: kube-system
+	  labels:
+	    k8s-app: kube-dns
+	    kubernetes.io/cluster-service: "true"
+	    kubernetes.io/name: "KubeDNS"
+	spec:
+	  selector:
+	    k8s-app: kube-dns
+	  clusterIP: 192.168.1.1 
+	  ports:
+	  - name: dns
+	    port: 53
+	    protocol: UDP
+	  - name: dns-tcp
+	    port: 53
+	    protocol: TCP
+### 3)验证，如果能解析，则说明正确，否则查看日志
+	kubectl run -i -t busybox --image=busybox --restart=Never -- nslookup kubernetes.default
+## 8. 安装dashboard
+### 1）dashboard.yaml
+	# Copyright 2015 Google Inc. All Rights Reserved.
+	#
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+
+	# Configuration to deploy release version of the Dashboard UI.
+	#
+	# Example usage: kubectl create -f <this_file>
+
+	kind: Deployment
+	apiVersion: extensions/v1beta1
+	metadata:
+	  labels:
+	    app: kubernetes-dashboard
+	  name: kubernetes-dashboard
+	  namespace: kube-system
+	spec:
+	  replicas: 1
+	  selector:
+	    matchLabels:
+	      app: kubernetes-dashboard
+	  template:
+	    metadata:
+	      labels:
+		app: kubernetes-dashboard
+	      # Comment the following annotation if Dashboard must not be deployed on master
+	      annotations:
+		scheduler.alpha.kubernetes.io/tolerations: |
+		  [
+		    {
+		      "key": "dedicated",
+		      "operator": "Equal",
+		      "value": "master",
+		      "effect": "NoSchedule"
+		    }
+		  ]
+	    spec:
+	      containers:
+	      - name: kubernetes-dashboard
+		image: gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.0
+		imagePullPolicy: Always
+		ports:
+		- containerPort: 9090
+		  protocol: TCP
+		args:
+		  # Uncomment the following line to manually specify Kubernetes API server Host
+		  # If not specified, Dashboard will attempt to auto discover the API server and connect
+		  # to it. Uncomment only if the default does not work.
+		  - --apiserver-host=http://10.1.245.224:9090
+		livenessProbe:
+		  httpGet:
+		    path: /
+		    port: 9090
+		  initialDelaySeconds: 30
+		  timeoutSeconds: 30
+	---
+	kind: Service
+	apiVersion: v1
+	metadata:
+	  labels:
+	    app: kubernetes-dashboard
+	  name: kubernetes-dashboard
+	  namespace: kube-system
+	spec:
+	  type: NodePort
+	  ports:
+	  - port: 80
+	    targetPort: 9090 
+	  selector:
+	    app: kubernetes-dashboard
+### 2）kubectl create -f dashboard.yaml
+### 3) 在浏览器中打开查看界面
