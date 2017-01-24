@@ -826,3 +826,5 @@ CAlICO作为容器间网络实现
 	InfluxDB is running at http://10.1.245.224:9090/api/v1/proxy/namespaces/kube-system/services/monitoring-influxdb
 
 	To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+### 6）在浏览器中访问地址 http://10.1.245.224:9090/api/v1/proxy/namespaces/kube-system/services/monitoring-grafana 如果页面正常显示节点资源情况，pod资源情况则表示正常
+### 7）
