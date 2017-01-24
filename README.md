@@ -829,5 +829,61 @@ CAlICO作为容器间网络实现
 ### 6）在浏览器中访问地址 http://10.1.245.224:9090/api/v1/proxy/namespaces/kube-system/services/monitoring-grafana 如果页面正常显示节点资源情况，pod资源情况则表示正常
 ### 7）在浏览器中再次访问dashboard，看是否正常显示了资源图形
 ## 10. HAPROXY安装
-### 1） 安装
-## 10. HAPROXY安装ha
+### 1） 本次haproxy只做代理，对于https走tcp模式。安装 haproxy
+	yum -y install haproxy
+### 2) 配置 haproxy
+	/etc/haproxy/haproxy.conf
+	
+	global
+	log /dev/log local0
+	log /dev/log local1 notice
+	chroot /var/lib/haproxy
+	stats socket /run/haproxy/admin.sock mode 660 level admin
+	stats timeout 30s
+	user haproxy
+	group haproxy
+	daemon
+ 
+	maxconn 2048
+
+
+
+	defaults
+		log global
+		mode http
+		option forwardfor
+		option forwardfor
+		option httplog
+		option dontlognull
+		timeout connect 5000
+		timeout client 50000
+		timeout server 50000
+
+ 
+ 
+	frontend kube-api-http
+		bind *:9090
+		reqadd X-Forwarded-Proto:\ http
+		default_backend www-http-backend
+
+	backend www-http-backend
+		option httpchk get /healthz
+		http-check expect string ok
+		server kube-controller0 10.1.245.224:8080 check
+		server kube-controller1 10.1.245.225:8080 check
+
+	frontend kube-api-https
+		bind *:9443
+		option tcplog
+		mode tcp
+		default_backend www-https-backend
+
+	backend www-https-backend
+		option tcplog
+		mode tcp
+		server kube-controller0 10.1.245.224:8443 check
+		server kube-controller1 10.1.245.225:8443 check
+### 3）修改两个主的apiserver地址，然后重启，然后启动Haproxy
+### 4）进行前面的各种验证，功能是否正常
+## 11. 安装keepalived  
+由于网上文档较多，此处略
