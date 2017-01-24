@@ -1,7 +1,8 @@
 # Kubernetes-HA-Install
-搭建CentOS 7.0 可用于生产环境的高可用ApiServer的Kubernetes集群
-
-## 1.环境规划  
+搭建CentOS 7.0 可用于生产环境的高可用ApiServer的Kubernetes集群  
+HAProxy作为代理服务器实现HA  
+CAlICO作为容器间网络实现
+## 1.环境规划  
    本次kubernetes安装在4台机器上，其中两台作为ApiServer(含ContollerManager和Scheduler)，四台作为工作节点。  
    本次地址分配：  
    
@@ -286,7 +287,7 @@
 
 	# How the controller-manager, scheduler, and proxy find the apiserver
 	KUBE_MASTER="--master=http://10.1.245.224:9090"
-#### /etc/kubernetes/apiserver
+#### /etc/kubernetes/apiserver(注意：此处监听地址和其他使用的地方地址并不一致，是后来搭建HaProxy的地址，在Haproxy没有搭建成功时，需要使用9090和9443地址)
 	###
 	# kubernetes system config
 	#
@@ -383,4 +384,15 @@
 	journalctl -F
 ##### 验证api 服务是否正常
 	curl http://127.0.0.1:8080 
-    	curl -k -u admin:123456 https://127.0.0.1:8443 	
+	curl -k -u admin:123456 https://127.0.0.1:8443 	
+#### 生成本地  kubeconfig
+	kubectl config set-cluster local --insecure-skip-tls-verify=true --server=http://10.1.245.224:9090 --api-version=v1 
+	kubectl config set-context default/local --user=admin --namespace=default --cluster=local
+	kubectl config use-context default/local
+#### 发布验证  		
+	kubectl run nginx --replicas=2 --image=nginx
+	kubectl get pod -o wide
+	kubectl get service -o wide
+	kubectl get pod -o wide --namespace=kube-system
+#### 如果正常运行了容器则部署成功
+## 4. 安装 Calico 网络
