@@ -490,7 +490,36 @@ CAlICO作为容器间网络实现
 		      value: "true"
 	kubectl -f calico-policy-controller.yml
 ### 5)验证网络服务
-	calicoctl status 显示
-### 5)验证网络服务	
-### 5)验证网络服务	
-### 5)验证网络服务	
+	calicoctl status 显示每个节点都已经联通
+	calico-node container is running. Status: Up 3 days
+
+	IPv4 BGP status
+	IP: 10.1.245.224    AS Number: 64511 (inherited)
+	+--------------+-------------------+-------+------------+-------------+
+	| Peer address |     Peer type     | State |   Since    |     Info    |
+	+--------------+-------------------+-------+------------+-------------+
+	| 10.1.245.225 | node-to-node mesh |   up  | 2017-01-21 | Established |
+	|  10.1.245.8  | node-to-node mesh |   up  | 2017-01-21 | Established |
+	|  10.1.245.9  | node-to-node mesh |   up  | 2017-01-21 | Established |
+	+--------------+-------------------+-------+------------+-------------+
+	
+	calicoctl profile show 
+	+--------------------+
+	|        Name        |
+	+--------------------+
+	|   k8s_ns.default   |
+	| k8s_ns.kube-system |
+	+--------------------+
+	calicoctl pool show
+	+----------------+-------------------+
+	|   IPv4 CIDR    |      Options      |
+	+----------------+-------------------+
+	| 192.168.0.0/16 | ipip,nat-outgoing |
+	+----------------+-------------------+
+	+--------------------------+---------+
+	|        IPv6 CIDR         | Options |
+	+--------------------------+---------+
+	| fd80:24e2:f998:72d6::/64 |         |
+	+--------------------------+---------+
+	
+#### 如果		
