@@ -119,3 +119,4 @@
 	IP.3 = ${MASTER_IP}
 	IP.4 = ${MASTER_LOADBALANCER_IP}
 	IP.5 = 192.168.0.1
+替换相应的变量提交地址提交为实际地址
