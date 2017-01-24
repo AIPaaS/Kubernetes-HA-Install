@@ -434,4 +434,63 @@ CAlICO作为容器间网络实现
 	[Install]
 	WantedBy=multi-user.target
 ### 3）将此服务分发到四个节点，并启动
+      docker logs 
+      docker exec -ti 
+      查看是否正常启动
+      export ETCD_ENDPOINTS=http://10.1.245.224:2379,http://10.1.245.225:2379,http://10.1.245.226:2379
+      cailcoctl status
+### 4) 创建kubernetes 监听 calico-controller
+	calico-policy-controller.yml 
 	
+	# Create this manifest using kubectl to deploy
+	# the Calico policy controller on Kubernetes.
+	# It deploys a single instance of the policy controller.
+	apiVersion: extensions/v1beta1
+	kind: Deployment 
+	metadata:
+	  name: calico-policy-controller
+	  namespace: kube-system
+	  labels:
+	    k8s-app: calico-policy
+	spec:
+	  # Only a single instance of the policy controller should be 
+	  # active at a time.  Since this pod is run as a Deployment,
+	  # Kubernetes will ensure the pod is recreated in case of failure,
+	  # removing the need for passive backups.
+	  replicas: 1
+	  strategy:
+	    type: Recreate
+	  template:
+	    metadata:
+	      name: calico-policy-controller
+	      namespace: kube-system
+	      labels:
+		k8s-app: calico-policy
+	    spec:
+	      hostNetwork: true
+	      containers:
+		- name: calico-policy-controller
+		  # Make sure to pin this to your desired version.
+		  image: calico/kube-policy-controller:latest
+		  env:
+		    # Configure the policy controller with the location of 
+		    # your etcd cluster.
+		    - name: ETCD_ENDPOINTS
+		      value: "http://10.1.245.224:2379"
+		    # Location of the Kubernetes API - this shouldn't need to be 
+		    # changed so long as it is used in conjunction with 
+		    # CONFIGURE_ETC_HOSTS="true".
+		    - name: K8S_API
+		      value: "http://10.1.245.224:9090"
+		    # Configure /etc/hosts within the container to resolve 
+		    # the kubernetes.default Service to the correct clusterIP
+		    # using the environment provided by the kubelet.
+		    # This removes the need for KubeDNS to resolve the Service.
+		    - name: CONFIGURE_ETC_HOSTS
+		      value: "true"
+	kubectl -f calico-policy-controller.yml
+### 5)验证网络服务
+	calicoctl status 显示
+### 5)验证网络服务	
+### 5)验证网络服务	
+### 5)验证网络服务	
