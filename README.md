@@ -313,6 +313,74 @@
 
 	# Add your own!
 	KUBE_API_ARGS=" --advertise-address=10.1.245.224 --bind-address=0.0.0.0 --secure-port=8443 --basic-auth-file=/etc/kubernetes/pki/tokens.csv --client-ca-file=/etc/kubernetes/pki/ca.pem --tls-cert-file=/etc/kubernetes/pki/apiserver.pem --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem"
+#### /etc/kubernetes/controller-manager
+	###
+	# The following values are used to configure the kubernetes controller-manager
 
-##### 验证curl -k -u admin:123456 https://127.0.0.1:8443 	
-KUBE_API_ARGS=" --advertise-address=10.1.245.224 --bind-address=0.0.0.0 --secure-port=8443 --basic-auth-file=/etc/kubernetes/pki/tokens.csv --client-ca-file=/etc/kubernetes/pki/ca.pem --tls-cert-file=/etc/kubernetes/pki/apiserver.pem --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem"
+	# defaults from config and apiserver should be adequate
+
+	# Add your own!
+	KUBE_CONTROLLER_MANAGER_ARGS="  --master=10.1.245.224:9090 \
+	  --leader-elect=true \
+	  --cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem \
+	  --cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem \
+	  --root-ca-file=/etc/kubernetes/pki/ca.pem \
+	  --service-account-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
+	  --node-monitor-grace-period=10s --node-monitor-period=5s --pod-eviction-timeout=5m0s"
+####  /etc/kubernetes/scheduler 
+	###
+	# kubernetes scheduler config
+
+	# default config should be adequate
+
+	# Add your own!
+	KUBE_SCHEDULER_ARGS=" --leader-elect=true"
+#### /etc/kubernetes/kubelet
+	###
+	# kubernetes kubelet (minion) config
+
+	# The address for the info server to serve on (set to 0.0.0.0 or "" for all interfaces)
+	KUBELET_ADDRESS="--address=0.0.0.0"
+
+	# The port for the info server to serve on
+	# KUBELET_PORT="--port=10250"
+
+	# You may leave this blank to use the actual hostname
+	KUBELET_HOSTNAME="--hostname-override=10.1.245.224"
+
+	# location of the api-server
+	KUBELET_API_SERVER="--api-servers=http://10.1.245.224:9090,http://10.1.245.225:9090"
+
+	# pod infrastructure container
+	KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=registry.access.redhat.com/rhel7/pod-infrastructure:latest"
+
+	# Add your own!
+	KUBELET_ARGS=" --cluster_dns=192.168.1.1 --cluster_domain=cluster.local --network-plugin=cni --network-plugin-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin --register-node=true --allow-privileged=true --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml --tls-cert-file=/etc/kubernetes/ssl/worker.pem --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem --node-ip=10.1.245.224 --cluster-domain=cluster.local --image-gc-high-threshold=90 --image-gc-low-threshold=80"
+#### /etc/kubernetes/proxy
+	###
+	# kubernetes proxy config
+
+	# default config should be adequate
+
+	# Add your own!
+	KUBE_PROXY_ARGS=" --proxy-mode=iptables --hostname-override=10.1.245.224 --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml"
+#### 将各个配置文件分发到对应节点，并进行相应的调整
+##### 启动 kubernetes，在相应的节点启动相应的服务并查看服务状态的日志，看是否正常启动  
+	systemctl daemon-reload
+	systemctl enable kube-apiserver
+	systemctl enable kube-controller-manager
+	systemctl enable kube-scheduler
+	systemctl enable kube-kubelet
+	systemctl enable kube-proxy
+	systemctl start kube-apiserver
+	systemctl start kube-controller-manager
+	systemctl start kube-scheduler
+	systemctl start kube-kubelet
+	systemctl start kube-proxy
+	
+	systemctl status kube-apiserver
+	journalctl -xe
+	journalctl -F
+##### 验证api 服务是否正常
+	curl http://127.0.0.1:8080 
+    	curl -k -u admin:123456 https://127.0.0.1:8443 	
