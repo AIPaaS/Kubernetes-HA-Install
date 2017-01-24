@@ -88,7 +88,34 @@
 	...
 	
 ### 2) 准备各种证书  
-创建证书目录 ：mkdir -p /etc/kubernetes/pki
+#### 创建证书目录 ：mkdir -p /etc/kubernetes/pki  
+#### 生成基本口令验证文件：echo 123456,admin,ots-pad>/etc/kubernetes/pki/tokens.csv  
+     	口令文件为密码，用户名，用户id模式，在访问apiserver时需要在http头里进行相应的设置  
+     	Authorization：Basic BASE64ENCODEDUSER:PASSWORD  
+#### 生成根自签名证书
 
-### 2) 准备各种证书	
-### 2) 准备各种证书	
+	openssl genrsa -out ca-key.pem 2048
+	openssl req -x509 -new -nodes -key ca-key.pem -days 10000 -out ca.pem -subj "/CN=kube-ca"
+
+#### 准备apiserver证书  
+生成 openssl.cnf 
+
+	[req]
+	req_extensions = v3_req
+	distinguished_name = req_distinguished_name
+	[req_distinguished_name]
+	[ v3_req ]
+	basicConstraints = CA:FALSE
+	keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+	subjectAltName = @alt_names
+	[alt_names]
+	DNS.1 = kubernetes
+	DNS.2 = kubernetes.default
+	DNS.3 = kubernetes.default.svc
+	DNS.4 = kubernetes.default.svc.cluster.local
+	DNS.5 = ${MASTER_DNS_NAME}
+	IP.1 = ${K8S_SERVICE_IP}
+	IP.2 = ${MASTER_HOST}
+	IP.3 = ${MASTER_IP}
+	IP.4 = ${MASTER_LOADBALANCER_IP}
+	IP.5 = 192.168.0.1
