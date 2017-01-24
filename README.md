@@ -400,6 +400,32 @@ CAlICO作为容器间网络实现
 ### 1）下载 calicoctl
 	wget https://github.com/projectcalico/calicoctl/releases/download/v0.23.1/calicoctl
 	cp calicoctl /usr/bin
+### 2）下载 calico,calico-ipam, loopback
+	wget -N -P /opt/cni/bin https://github.com/projectcalico/calico-cni/releases/download/v1.5.5/calico
+	wget -N -P /opt/cni/bin https://github.com/projectcalico/calico-cni/releases/download/v1.5.5/calico-ipam
+	chmod +x /opt/cni/bin/calico /opt/cni/bin/calico-ipam
+	mkdir -p /etc/cni/net.d
+	cat >/etc/cni/net.d/10-calico.conf <<EOF
+	{
+	    "name": "calico-k8s-network",
+	    "type": "calico",
+	    "etcd_endpoints": "http://<ETCD_IP>:<ETCD_PORT>",
+	    "log_level": "info",
+	    "ipam": {
+		"type": "calico-ipam"
+	    },
+	    "policy": {
+		"type": "k8s"
+	    },
+	    "kubernetes": {
+		"kubeconfig": "</PATH/TO/KUBECONFIG>"
+	    }
+	}
+	EOF
+	
+	wget https://github.com/containernetworking/cni/releases/download/v0.3.0/cni-v0.3.0.tgz
+	tar -zxvf cni-v0.3.0.tgz
+	sudo cp loopback /opt/cni/bin/
 ### 2) 创建calico-node 服务  
 	/usr/lib/systemd/system/calico-node.service
 
