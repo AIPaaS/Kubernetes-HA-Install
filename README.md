@@ -29,3 +29,18 @@
 ### 4) 其余节点向224同步 ：ntpdate 10.1.245.224，并在crontab 中增加：   
        00 */1 * * * root /usr/sbin/ntpdate 10.1.245.224;/sbin/hwclock -w  
        使用 crontab -l 查看
+## 3. 安装ETCD 集群(非安全模式)  
+     在各个节点安装 ETCD包  
+     
+     yum -y install etcd  
+在各个节点配置ETCD（/etc/etcd/etcd.conf） 
+
+     ETCD_LISTEN_PEER_URLS="http://0.0.0.0:2380"
+     ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"	
+     ETCD_INITIAL_ADVERTISE_PEER_URLS="http://10.1.245.225:2380"
+     ETCD_INITIAL_CLUSTER="kube-etcd-224=http://10.1.245.224:2380,kube-etcd-225=http://10.1.245.225:2380,kube-etcd-226=http://10.1.245.226:2380"
+     ETCD_INITIAL_CLUSTER_STATE="existing"
+     ETCD_INITIAL_CLUSTER_TOKEN="kube-etcd-cluster"
+     
+     
+		ETCD_ADVERTISE_CLIENT_URLS="http://10.1.245.225:2379"
