@@ -152,3 +152,112 @@
 	openssl req -new -key admin-key.pem -out admin.csr -subj "/CN=kube-admin"
 	openssl x509 -req -in admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out admin.pem -days 365
 	
+### 3）生成systemctl 服务
+#### kube-apiserver.service
+
+	[Unit]
+	Description=Kubernetes API Server
+	Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+	After=network.target
+	After=etcd.service
+
+	[Service]
+	EnvironmentFile=-/etc/kubernetes/config
+	EnvironmentFile=-/etc/kubernetes/apiserver
+	ExecStart=/usr/bin/kube-apiserver \
+		    $KUBE_LOGTOSTDERR \
+		    $KUBE_LOG_LEVEL \
+		    $KUBE_ETCD_SERVERS \
+		    $KUBE_API_ADDRESS \
+		    $KUBE_API_PORT \
+		    $KUBELET_PORT \
+		    $KUBE_ALLOW_PRIV \
+		    $KUBE_SERVICE_ADDRESSES \
+		    $KUBE_ADMISSION_CONTROL \
+		    $KUBE_API_ARGS
+	Restart=on-failure
+	Type=notify
+	LimitNOFILE=65536
+
+	[Install]
+	WantedBy=multi-user.target
+#### kube-controller-manager.service
+	[Unit]
+	Description=Kubernetes Controller Manager
+	Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+	[Service]
+	EnvironmentFile=-/etc/kubernetes/config
+	EnvironmentFile=-/etc/kubernetes/controller-manager
+	ExecStart=/usr/bin/kube-controller-manager \
+		    $KUBE_LOGTOSTDERR \
+		    $KUBE_LOG_LEVEL \
+		    $KUBE_MASTER \
+		    $KUBE_CONTROLLER_MANAGER_ARGS
+	Restart=on-failure
+	LimitNOFILE=65536
+
+	[Install]
+	WantedBy=multi-user.target
+#### kube-scheduler.service
+	[Unit]
+	Description=Kubernetes Scheduler Plugin
+	Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+
+	[Service]
+	EnvironmentFile=-/etc/kubernetes/config
+	EnvironmentFile=-/etc/kubernetes/scheduler
+	ExecStart=/usr/bin/kube-scheduler \
+		    $KUBE_LOGTOSTDERR \
+		    $KUBE_LOG_LEVEL \
+		    $KUBE_MASTER \
+		    $KUBE_SCHEDULER_ARGS
+	Restart=on-failure
+	LimitNOFILE=65536
+
+	[Install]
+	WantedBy=multi-user.target
+#### kubelet.service
+	[Unit]
+	Description=Kubernetes Kubelet Server
+	Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+	After=docker.service
+	Requires=docker.service
+
+	[Service]
+	WorkingDirectory=/var/lib/kubelet
+	EnvironmentFile=-/etc/kubernetes/config
+	EnvironmentFile=-/etc/kubernetes/kubelet
+	ExecStart=/usr/bin/kubelet \
+		    $KUBE_LOGTOSTDERR \
+		    $KUBE_LOG_LEVEL \
+		    $KUBELET_API_SERVER \
+		    $KUBELET_ADDRESS \
+		    $KUBELET_PORT \
+		    $KUBELET_HOSTNAME \
+		    $KUBE_ALLOW_PRIV \
+		    $KUBELET_POD_INFRA_CONTAINER \
+		    $KUBELET_ARGS
+	Restart=on-failure
+
+	[Install]
+	WantedBy=multi-user.target
+#### kube-proxy.service
+	[Unit]
+	Description=Kubernetes Kube-Proxy Server
+	Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+	After=network.target
+
+	[Service]
+	EnvironmentFile=-/etc/kubernetes/config
+	EnvironmentFile=-/etc/kubernetes/proxy
+	ExecStart=/usr/bin/kube-proxy \
+		    $KUBE_LOGTOSTDERR \
+		    $KUBE_LOG_LEVEL \
+		    $KUBE_MASTER \
+		    $KUBE_PROXY_ARGS
+	Restart=on-failure
+	LimitNOFILE=65536
+
+	[Install]
+	WantedBy=multi-user.target
