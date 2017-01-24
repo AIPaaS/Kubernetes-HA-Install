@@ -395,4 +395,7 @@ CAlICO作为容器间网络实现
 	kubectl get service -o wide
 	kubectl get pod -o wide --namespace=kube-system
 #### 如果正常运行了容器则部署成功
-## 4. 安装 Calico 网络
+## 4. 安装 Calico 网络  
+	本次网络
+
+### 1）下载
