@@ -66,7 +66,7 @@
 	curl http://10.1.241.123:2379/v2/keys/message  	
 检查各个节点的日志，确认etcd 集群工作正常
 
-## 3.安装kubernetes
+## 4.安装kubernetes
 ### 1）下载kubernetes发行包
 
 	wget https://github.com/kubernetes/kubernetes/releases/download/v1.5.2/kubernetes.tar.gz
@@ -261,3 +261,58 @@
 
 	[Install]
 	WantedBy=multi-user.target
+##### 将生成好的文件分发给相应的节点  
+生成通用配置文件 /etc/kubernetes/config
+
+	###
+	# kubernetes system config
+	#
+	# The following values are used to configure various aspects of all
+	# kubernetes services, including
+	#
+	#   kube-apiserver.service
+	#   kube-controller-manager.service
+	#   kube-scheduler.service
+	#   kubelet.service
+	#   kube-proxy.service
+	# logging to stderr means we get it in the systemd journal
+	KUBE_LOGTOSTDERR="--logtostderr=true"
+
+	# journal message level, 0 is debug
+	KUBE_LOG_LEVEL="--v=0"
+
+	# Should this cluster be allowed to run privileged docker containers
+	KUBE_ALLOW_PRIV="--allow-privileged=true"
+
+	# How the controller-manager, scheduler, and proxy find the apiserver
+	KUBE_MASTER="--master=http://10.1.245.224:9090"
+#### /etc/kubernetes/apiserver
+	###
+	# kubernetes system config
+	#
+	# The following values are used to configure the kube-apiserver
+	#
+
+	# The address on the local server to listen to.
+	KUBE_API_ADDRESS="--insecure-bind-address=0.0.0.0"
+
+	# The port on the local server to listen on.
+	KUBE_API_PORT="--insecure-port=8080"
+
+	# Port minions listen on
+	# KUBELET_PORT="--kubelet-port=10250"
+
+	# Comma separated list of nodes in the etcd cluster
+	KUBE_ETCD_SERVERS="--etcd-servers=http://10.1.245.224:2379,http://10.1.245.225:2379,http://10.1.245.226:2379"
+
+	# Address range to use for services
+	KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range=192.168.0.0/16"
+
+	# default admission control policies
+	KUBE_ADMISSION_CONTROL="--admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota"
+
+	# Add your own!
+	KUBE_API_ARGS=" --advertise-address=10.1.245.224 --bind-address=0.0.0.0 --secure-port=8443 --basic-auth-file=/etc/kubernetes/pki/tokens.csv --client-ca-file=/etc/kubernetes/pki/ca.pem --tls-cert-file=/etc/kubernetes/pki/apiserver.pem --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem"
+
+##### 验证curl -k -u admin:123456 https://127.0.0.1:8443 	
+KUBE_API_ARGS=" --advertise-address=10.1.245.224 --bind-address=0.0.0.0 --secure-port=8443 --basic-auth-file=/etc/kubernetes/pki/tokens.csv --client-ca-file=/etc/kubernetes/pki/ca.pem --tls-cert-file=/etc/kubernetes/pki/apiserver.pem --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem"
