@@ -60,6 +60,35 @@
 	curl http://10.1.241.124:2379/v2/keys/message -XPUT -d value="Hello world"
 	curl http://10.1.241.124:2379/v2/keys/message 
 	curl http://10.1.241.123:2379/v2/keys/message  	
+检查各个节点的日志，确认etcd 集群工作正常
 
+## 3.安装kubernetes
+### 1）下载kubernetes发行包
 
+	wget https://github.com/kubernetes/kubernetes/releases/download/v1.5.2/kubernetes.tar.gz
+	tar zxvf kubernetes.tar.gz
+	cd kubernetes
+	cluster/get-kube-binaries.sh
+	cd server
+	tar zxvf kubernetes-manifests.tar.gz
+ 	tar zxvf kubernetes-salt.tar.gz 
+	cd .. 
+	cp ./server/kubernetes/server/bin/kube-apiserver /usr/bin/
+ 	cp ./server/kubernetes/server/bin/kube-controller-manager /usr/bin/
+ 	cp ./server/kubernetes/server/bin/kubectl /usr/bin/
+ 	cp ./server/kubernetes/server/bin/kube-discovery /usr/bin/
+ 	cp ./server/kubernetes/server/bin/kube-dns /usr/bin/
+ 	cp ./server/kubernetes/server/bin/kubefed /usr/bin/
+ 	cp ./server/kubernetes/server/bin/kubelet /usr/bin/
+ 	cp ./server/kubernetes/server/bin/kube-proxy /usr/bin/
+ 	cp ./server/kubernetes/server/bin/kube-scheduler /usr/bin/
+使用 scp 命令将这些可执行文件分发到相应的节点目录下。
 
+	scp 10.1.245.224:/usr/bin/kubectl /usr/bin/
+	...
+	
+### 2) 准备各种证书  
+创建证书目录 ：mkdir -p /etc/kubernetes/pki
+
+### 2) 准备各种证书	
+### 2) 准备各种证书	
