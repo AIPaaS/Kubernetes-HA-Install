@@ -42,5 +42,24 @@
      ETCD_INITIAL_CLUSTER_STATE="existing"
      ETCD_INITIAL_CLUSTER_TOKEN="kube-etcd-cluster"
      
-     
-		ETCD_ADVERTISE_CLIENT_URLS="http://10.1.245.225:2379"
+     ETCD_ADVERTISE_CLIENT_URLS="http://10.1.245.225:2379"
+     
+启动各个节点：systemctl enable etcd   
+            systemctl start etcd  	
+常用命令：
+        
+	etcdctl rm --recursive /registry
+	etcdctl rm --recursive /calico
+	etcdctl cluster-health
+		member 6e5d6be96ebe4afa is healthy: got healthy result from http://10.1.245.225:2379
+		member bdac6ad1e399cb3a is healthy: got healthy result from http://10.1.245.224:2379
+		member eae8375054ea3a5a is healthy: got healthy result from http://10.1.245.226:2379
+	etcdctl ls
+	
+	curl -L http://10.1.241.124:2379/v2/keys/mykey -XPUT -d value="this is awesome"
+	curl http://10.1.241.124:2379/v2/keys/message -XPUT -d value="Hello world"
+	curl http://10.1.241.124:2379/v2/keys/message 
+	curl http://10.1.241.123:2379/v2/keys/message  	
+
+
+
