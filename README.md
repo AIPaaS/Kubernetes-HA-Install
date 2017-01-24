@@ -16,8 +16,8 @@ CAlICO作为容器间网络实现
 10.1.245.225 kube-worker-4
    本次安装操作系统为CentOS 7.1，Kubernetes 1.5.2（文档撰写时最新版），本次安装可能并不适合其他版本，请酌情参考。  
    本次 Kubernetes 安装未采用镜像模式或者kubeadm模式进行，而是采用了传统的 yum 加上二进制发行包模式。  
-   
-## 2. 安装时间同步服务 NTP  
+   在每个节点上执行 setenforce 0
+## 2. 安装时间同步服务 NTP  
 ### 1) 在各台机器安装 NTP yum -y install ntp  
 ### 2) 配置 10.1.245.224 为 NTP 主服务器  修改 /etc/ntp.conf  
 
@@ -529,3 +529,4 @@ CAlICO作为容器间网络实现
 	
 #### 如果以上信息显示不一致，则说明搭建不成功。如果pool没有显示 ipip等，需要删除pool，自己手动添加。
 #### 可以使用ip route 命令查看并删除不需要的路由，使用iptables -L,iptable -F, iptables -X, iptable -Z查看或者清空防火墙规则
+#### 按照上面的创建容器方法重新创建两个容器，在容器内互相ping 对方，如果可以ping通，则网络完成。如果不通，需要查看各个部分的日志
