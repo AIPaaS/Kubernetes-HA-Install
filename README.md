@@ -395,7 +395,43 @@ CAlICO作为容器间网络实现
 	kubectl get service -o wide
 	kubectl get pod -o wide --namespace=kube-system
 #### 如果正常运行了容器则部署成功
-## 4. 安装 Calico 网络  
-	本次网络
+## 5. 安装 Calico 网络  
+	本次网络安装不采用容器模式，采用常规模式，以便调试容器间网络
+### 1）下载 calicoctl
+	wget https://github.com/projectcalico/calicoctl/releases/download/v0.23.1/calicoctl
+	cp calicoctl /usr/bin
+### 2) 创建calico-node 服务  
+	/usr/lib/systemd/system/calico-node.service
 
-### 1）下载
+	[Unit]
+	Description=calicoctl node
+	After=docker.service
+	Requires=docker.service
+
+	[Service]
+	User=root
+	Environment=ETCD_ENDPOINTS=http://10.1.245.224:2379,http://10.1.245.225:2379,http://10.1.245.226:237
+	PermissionsStartOnly=true
+	ExecStart=/usr/bin/docker run --net=host --privileged --name=calico-node \
+	  -e ETCD_ENDPOINTS=${ETCD_ENDPOINTS} \
+	  -e NODENAME=${HOSTNAME} \
+	  -e IP= \
+	  -e NO_DEFAULT_POOLS= \
+	  -e AS= \
+	  -e CALICO_LIBNETWORK_ENABLED=true \
+	  -e IP6= \
+	  -e CALICO_NETWORKING_BACKEND=bird \
+	  -v /var/run/calico:/var/run/calico \
+	  -v /lib/modules:/lib/modules \
+	  -v /run/docker/plugins:/run/docker/plugins \
+	  -v /var/run/docker.sock:/var/run/docker.sock \
+	  -v /var/log/calico:/var/log/calico \
+	  calico/node:latest
+	ExecStop=/usr/bin/docker rm -f calico-node
+	Restart=always
+	RestartSec=10
+
+	[Install]
+	WantedBy=multi-user.target
+### 3）将此服务分发到四个节点，并启动
+	
