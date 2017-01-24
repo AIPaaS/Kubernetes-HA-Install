@@ -1,0 +1,13 @@
+###
+# The following values are used to configure the kubernetes controller-manager
+
+# defaults from config and apiserver should be adequate
+
+# Add your own!
+KUBE_CONTROLLER_MANAGER_ARGS="  --master=10.1.245.224:9090 \
+  --leader-elect=true \
+  --cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem \
+  --cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem \
+  --root-ca-file=/etc/kubernetes/pki/ca.pem \
+  --service-account-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
+  --node-monitor-grace-period=10s --node-monitor-period=5s --pod-eviction-timeout=5m0s"

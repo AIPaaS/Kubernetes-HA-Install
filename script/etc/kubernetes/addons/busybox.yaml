@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    name: busybox
+    role: master
+  name: busybox
+spec:
+  containers:
+    - name: busybox
+      image: busybox  
+      command:
+      - sleep
+      - "360000"

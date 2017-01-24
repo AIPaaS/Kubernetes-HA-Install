@@ -1,0 +1,7 @@
+###
+# kubernetes proxy config
+
+# default config should be adequate
+
+# Add your own!
+KUBE_PROXY_ARGS=" --proxy-mode=iptables --hostname-override=10.1.245.224 --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml"
