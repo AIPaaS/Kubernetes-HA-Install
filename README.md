@@ -810,3 +810,19 @@ CAlICO作为容器间网络实现
 	    app: kubernetes-dashboard
 ### 2）kubectl create -f dashboard.yaml
 ### 3) 在浏览器中打开查看界面
+## 9. 安装监控 heapster
+### 1) 由于heapster和kubernetes版本有很大关系，不同版本的安装可能导致功能运行部正常。因此，将前面的二进制包解压缩的文件复制
+	cp kubernetes/server/kubernetes/addons/cluster-monitoring/influxdb/* /etc/kubernetes/addons/monitoring/
+### 2) 修改相应的地址为api地址	
+	kubectl -f /etc/kubernetes/addons/monitoring/
+### 3) 检查influxdb、grafana、heapster pod都已经运行起来
+### 4) 检查各个pod的日志是否运行正常
+### 5) 显示集群信息
+	kubectl cluster-info
+	Kubernetes master is running at http://10.1.245.224:9090
+	Heapster is running at http://10.1.245.224:9090/api/v1/proxy/namespaces/kube-system/services/heapster
+	KubeDNS is running at http://10.1.245.224:9090/api/v1/proxy/namespaces/kube-system/services/kube-dns
+	Grafana is running at http://10.1.245.224:9090/api/v1/proxy/namespaces/kube-system/services/monitoring-grafana
+	InfluxDB is running at http://10.1.245.224:9090/api/v1/proxy/namespaces/kube-system/services/monitoring-influxdb
+
+	To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
