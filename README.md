@@ -510,6 +510,11 @@ CAlICO作为容器间网络实现
 	|   k8s_ns.default   |
 	| k8s_ns.kube-system |
 	+--------------------+
+	calicoctl profile k8s_ns.default rule show
+	Inbound rules:
+	   1 allow
+	Outbound rules:
+	   1 allow
 	calicoctl pool show
 	+----------------+-------------------+
 	|   IPv4 CIDR    |      Options      |
@@ -522,4 +527,5 @@ CAlICO作为容器间网络实现
 	| fd80:24e2:f998:72d6::/64 |         |
 	+--------------------------+---------+
 	
-#### 如果		
+#### 如果以上信息显示不一致，则说明搭建不成功。如果pool没有显示 ipip等，需要删除pool，自己手动添加。
+#### 可以使用ip route 命令查看并删除不需要的路由，使用iptables -L,iptable -F, iptables -X, iptable -Z查看或者清空防火墙规则
