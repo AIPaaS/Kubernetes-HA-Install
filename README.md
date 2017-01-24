@@ -827,4 +827,7 @@ CAlICO作为容器间网络实现
 
 	To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ### 6）在浏览器中访问地址 http://10.1.245.224:9090/api/v1/proxy/namespaces/kube-system/services/monitoring-grafana 如果页面正常显示节点资源情况，pod资源情况则表示正常
-### 7）
+### 7）在浏览器中再次访问dashboard，看是否正常显示了资源图形
+## 10. HAPROXY安装
+### 1） 安装
+## 10. HAPROXY安装ha
