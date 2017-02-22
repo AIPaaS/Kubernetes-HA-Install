@@ -18,7 +18,8 @@ CAlICO作为容器间网络实现
    本次 Kubernetes 安装未采用镜像模式或者kubeadm模式进行，而是采用了传统的 yum 加上二进制发行包模式。  
    在每个节点上执行 setenforce 0
 ## 2. 安装时间同步服务 NTP  
-### 1) 在各台机器安装 NTP yum -y install ntp  
+### 1) 在各台机器安装 NTP yum -y install ntp 
+		 yum install conntrack-tools
 ### 2) 配置 10.1.245.224 为 NTP 主服务器  修改 /etc/ntp.conf  
 
 		     restrict default nomodify notrap nopeer noquery  
