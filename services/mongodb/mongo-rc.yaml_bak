@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: ReplicationController
+
+metadata:
+  name: mongo-1
+
+spec:
+  replicas: 1
+  selector:
+    name: mongo-nodea
+    role: mongo
+    environment: test
+
+  template:
+    metadata:
+      labels:
+        name: mongo-nodea
+        role: mongo
+        environment: test
+        type: mongo-rs-A
+    spec:
+      containers:
+        - name: mongo-nodea
+          image: 10.1.245.4:5000/mongo
+          command:
+            - mongod
+            - "--replSet"
+            - rs0
+            - "--smallfiles"
+            - "--noprealloc"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+      volumes:
+        - name: mongo-persistent-storage
+          flocker:
+            datasetName: FlockerMongoVolSetA
+
+---
+apiVersion: v1
+kind: ReplicationController
+
+metadata:
+  name: mongo-2
+
+spec:
+  replicas: 1
+  selector:
+    name: mongo-nodeb
+    role: mongo
+    environment: test
+
+  template:
+    metadata:
+      labels:
+        name: mongo-nodeb
+        role: mongo
+        environment: test
+        type: mongo-rs-B
+    spec:
+      containers:
+        - name: mongo-nodeb
+          image: 10.1.245.4:5000/mongo
+          command:
+            - mongod
+            - "--replSet"
+            - rs0
+            - "--smallfiles"
+            - "--noprealloc"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+      volumes:
+        - name: mongo-persistent-storage
+          flocker:
+            datasetName: FlockerMongoVolSetB
+
+---
+apiVersion: v1
+kind: ReplicationController
+
+metadata:
+  name: mongo-3
+
+spec:
+  replicas: 1
+  selector:
+    name: mongo-nodec
+    role: mongo
+    environment: test
+
+  template:
+    metadata:
+      labels:
+        name: mongo-nodec
+        role: mongo
+        environment: test
+        type: mongo-rs-C
+    spec:
+      containers:
+        - name: mongo-nodec
+          image: 10.1.245.4:5000/mongo
+          command:
+            - mongod
+            - "--replSet"
+            - rs0
+            - "--smallfiles"
+            - "--noprealloc"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-persistent-storage
+              mountPath: /data/db
+      volumes:
+        - name: mongo-persistent-storage
+          flocker:
+            datasetName: FlockerMongoVolSetC

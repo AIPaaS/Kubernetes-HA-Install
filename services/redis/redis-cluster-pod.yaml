@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    name: redis-cluster-init
+  name: redis-cluster-init
+spec:
+  containers:
+    - name: redis-cluster-init
+      image: 10.1.245.4:5000/redis_cluster
+      ports:
+        - containerPort: 6379
+      env:
+        - name: CLUSTER_INFO
+          value: "10.1.245.224:36379|10.1.245.224:36380|10.1.245.224:36381|10.1.245.224:36382|10.1.245.224:36383|10.1.245.8:36384"
+  restartPolicy: Never

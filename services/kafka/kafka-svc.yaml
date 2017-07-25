@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka1
+  labels:
+    app: kafka-1
+spec:
+  type: NodePort
+  ports:
+  - port: 9092
+    nodePort: 31092
+    name: kafka-port
+    protocol: TCP
+  selector:
+    app: kafka-1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka2
+  labels:
+    app: kafka-2
+spec:
+  type: NodePort
+  ports:
+  - port: 9092
+    nodePort: 31093
+    name: kafka-port
+    protocol: TCP
+  selector:
+    app: kafka-2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka3
+  labels:
+    app: kafka-3
+spec:
+  type: NodePort
+  ports:
+  - port: 9092
+    nodePort: 31094
+    name: kafka-port
+    protocol: TCP
+  selector:
+    app: kafka-3

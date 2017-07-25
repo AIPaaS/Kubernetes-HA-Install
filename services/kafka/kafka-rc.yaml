@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: kafka-controller-1
+spec:
+  replicas: 1
+  selector:
+    app: kafka-1
+  template:
+    metadata:
+      labels:
+        app: kafka-1
+    spec:
+      containers:
+      - name: kafka
+        image: 10.1.245.4:5000/kafka:2.11-0.9.0.1
+        ports:
+        - containerPort: 9092
+        env:
+        - name: brokerId
+          value: "1"
+        - name: port
+          value: "9092"
+        - name: hostId
+          value: 0.0.0.0
+        - name: adPort
+          value: "31092"
+        - name: adHostId
+          value: 10.1.245.8
+        - name: zookeepers
+          value: zoo1:2181,zoo2:2181,zoo3:2181
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: kafka-controller-2
+spec:
+  replicas: 1
+  selector:
+    app: kafka-2
+  template:
+    metadata:
+      labels:
+        app: kafka-2
+    spec:
+      containers:
+      - name: kafka
+        image: 10.1.245.4:5000/kafka:2.11-0.9.0.1
+        ports:
+        - containerPort: 9092
+        env:
+        - name: brokerId
+          value: "2"
+        - name: port
+          value: "9092"
+        - name: hostId
+          value: 0.0.0.0
+        - name: adPort
+          value: "31093"
+        - name: adHostId
+          value: 10.1.245.9
+        - name: zookeepers
+          value: zoo1:2181,zoo2:2181,zoo3:2181
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: kafka-controller-3
+spec:
+  replicas: 1
+  selector:
+    app: kafka-3
+  template:
+    metadata:
+      labels:
+        app: kafka-3
+    spec:
+      containers:
+      - name: kafka
+        image: 10.1.245.4:5000/kafka:2.11-0.9.0.1
+        ports:
+        - containerPort: 9092
+        env:
+        - name: brokerId
+          value: "3"
+        - name: port
+          value: "9092"
+        - name: hostId
+          value: 0.0.0.0
+        - name: adPort
+          value: "31094"
+        - name: adHostId
+          value: 10.1.245.225
+        - name: zookeepers
+          value: zoo1:2181,zoo2:2181,zoo3:2181

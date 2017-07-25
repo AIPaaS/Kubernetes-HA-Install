@@ -1,0 +1,185 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-cluster-1
+spec:
+  replicas: 1
+  selector:
+    name: redis-cluster-1
+  template:
+    metadata:
+      name: redis-cluster-1
+      labels:
+        name: redis-cluster-1
+    spec:
+      hostNetwork: true
+      containers:
+      - name: redis-cluster-1
+        image: 10.1.245.4:5000/redis:3.2.1
+        ports:
+          - containerPort: 36379
+        env:
+          - name: START_MODE
+            value: cluster
+          - name: REDIS_PORT
+            value: "36379"
+          - name: MAX_MEM
+            value: "64m"
+          - name: PASSWORD
+            value: "123456"
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-cluster-2
+spec:
+  replicas: 1
+  selector:
+    name: redis-cluster-2
+  template:
+    metadata:
+      name: redis-cluster-2
+      labels:
+        name: redis-cluster-2
+    spec:
+      hostNetwork: true
+      containers:
+      - name: redis-cluster-2
+        image: 10.1.245.4:5000/redis:3.2.1
+        ports:
+          - containerPort: 36380
+        env:
+          - name: START_MODE
+            value: cluster
+          - name: REDIS_PORT
+            value: "36380"
+          - name: MAX_MEM
+            value: "64m"
+          - name: PASSWORD
+            value: "123456"
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-cluster-3
+spec:
+  replicas: 1
+  selector:
+    name: redis-cluster-3
+  template:
+    metadata:
+      name: redis-cluster-3
+      labels:
+        name: redis-cluster-3
+    spec:
+      hostNetwork: true
+      containers:
+      - name: redis-cluster-3
+        image: 10.1.245.4:5000/redis:3.2.1
+        ports:
+          - containerPort: 36381
+        env:
+          - name: START_MODE
+            value: cluster
+          - name: REDIS_PORT
+            value: "36381"
+          - name: MAX_MEM
+            value: "64m"
+          - name: PASSWORD
+            value: "123456"
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-cluster-4
+spec:
+  replicas: 1
+  selector:
+    name: redis-cluster-4
+  template:
+    metadata:
+      name: redis-cluster-4
+      labels:
+        name: redis-cluster-4
+    spec:
+      hostNetwork: true
+      containers:
+      - name: redis-cluster-4
+        image: 10.1.245.4:5000/redis:3.2.1
+        ports:
+          - containerPort: 36382 
+        env:
+          - name: START_MODE
+            value: cluster
+          - name: REDIS_PORT
+            value: "36382"
+          - name: MAX_MEM
+            value: "64m"
+          - name: PASSWORD
+            value: "123456"
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-cluster-5
+spec:
+  replicas: 1
+  selector:
+    name: redis-cluster-5
+  template:
+    metadata:
+      name: redis-cluster-5
+      labels:
+        name: redis-cluster-5
+    spec:
+      hostNetwork: true
+      containers:
+      - name: redis-cluster-5
+        image: 10.1.245.4:5000/redis:3.2.1
+        ports:
+          - containerPort: 36833
+          - containerPort: 46833
+        env:
+          - name: START_MODE
+            value: cluster
+          - name: REDIS_PORT
+            value: "36383"
+          - name: MAX_MEM
+            value: "64m"
+          - name: PASSWORD
+            value: "123456"
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-cluster-6
+spec:
+  replicas: 1
+  selector:
+    name: redis-cluster-6
+  template:
+    metadata:
+      name: redis-cluster-6
+      labels:
+        name: redis-cluster-6
+    spec:
+      hostNetwork: true
+      containers:
+      - name: redis-cluster-6
+        image: 10.1.245.4:5000/redis:3.2.1
+        ports:
+          - containerPort: 36384
+        env:
+          - name: START_MODE
+            value: cluster
+          - name: REDIS_PORT
+            value: "36384"
+          - name: MAX_MEM
+            value: "64m"
+          - name: PASSWORD
+            value: "123456"
+

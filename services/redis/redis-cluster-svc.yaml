@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster-1
+  labels:
+    name: redis-cluster-1
+spec:
+  type: NodePort
+  ports:
+  - name: port-36385
+    port: 36385
+    nodePort: 32109
+  - name: port-46379
+    port: 46379
+  selector:
+    name: redis-cluster-1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster-2
+  labels:
+    name: redis-cluster-2
+spec:
+  type: NodePort
+  ports:
+  - name: port-36380
+    port: 36380
+    nodePort: 32119
+  - name: port-46380
+    port: 46380
+  selector:
+    name: redis-cluster-2
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster-3
+  labels:
+    name: redis-cluster-3
+spec:
+  type: NodePort
+  ports:
+  - name: port-36381
+    port: 36381
+    nodePort: 32129
+  - name: port-46381
+    port: 46381
+  selector:
+    name: redis-cluster-3
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster-4
+  labels:
+    name: redis-cluster-4
+spec:
+  type: NodePort
+  ports:
+  - name: port-36382
+    port: 36382
+    nodePort: 32139
+  - name: port-46382
+    port: 46382
+  selector:
+    name: redis-cluster-4
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster-5
+  labels:
+    name: redis-cluster-5
+spec:
+  type: NodePort
+  ports:
+  - name: port-36383
+    port: 36383
+    nodePort: 32149
+  - name: port-46383
+    port: 46383
+  selector:
+    name: redis-cluster-5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster-6
+  labels:
+    name: redis-cluster-6
+spec:
+  type: NodePort
+  ports:
+  - name: port-36384
+    port: 36384
+    nodePort: 32159
+  - name: port-46384
+    port: 46384
+  selector:
+    name: redis-cluster-6
+

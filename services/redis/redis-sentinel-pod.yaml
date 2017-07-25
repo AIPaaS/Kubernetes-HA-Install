@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    name: redis-sentinel-slave
+    redis-sentinel: "true"
+    role: master
+  name: redis-sentinel-slave
+spec:
+  hostNetwork: true
+  containers:
+    - name: redis-sentinel-slave
+      image: 10.1.245.4:5000/redis:3.2.1
+      ports:
+        - containerPort: 56379
+      env:
+        - name: START_MODE
+          value: master
+        - name: REDIS_PORT
+          value: "56379"
+        - name: MAX_MEM
+          value: "64m"
+        - name: PASSWORD
+          value: "123456"
+    - name: redis-sentinel
+      image: 10.1.245.4:5000/redis:3.2.1
+      ports:
+        - containerPort: 26379
+      env:
+        - name: START_MODE
+          value: sentinel
+        - name: REDIS_PORT
+          value: "26379"
+        - name: MAX_MEM
+          value: "64m"
+        - name: MASTER_PORT
+          value: "56379"
+        - name: PASSWORD
+          value: "123456"
